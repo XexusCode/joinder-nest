@@ -30,6 +30,7 @@ export class UserRepository extends Repository<User> {
         throw new InternalServerErrorException();
       }
     }
+
   }
 
   async validateUserPassword(
