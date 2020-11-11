@@ -1,0 +1,8 @@
+docker run --name mysql -d -e MYSQL_ROOT_PASSWORD=cuatroochenta -e MYSQL_USER=cuatroochenta -e MYSQL_PASSWORD=cuatroochenta -p 3306:3306 -v c:\Users\Xexus-Portatil\mysql\data:/var/lib/mysql --restart=unless-stopped mysql:5.7.22
+
+C
+
+
+
+docker run --name phpmyadmin -d -e PMA_HOST=host.docker.internal -e PMA_PORT=3306 -e PMA_USER=root -e PMA_PASSWORD=cuatroochenta -p 7000:80 --restart=unless-stopped phpmyadmin/phpmyadmin:5
+
