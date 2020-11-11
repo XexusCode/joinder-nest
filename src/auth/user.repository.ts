@@ -22,7 +22,7 @@ export class UserRepository extends Repository<User> {
       await user.save();
     } catch (error) {
       if (error.code === '23505') {
-        // duplicate username
+        // duplicate usernamee
         throw new ConflictException('El usuario ya existe');
       } else {
         console.log(error);
@@ -30,7 +30,6 @@ export class UserRepository extends Repository<User> {
         throw new InternalServerErrorException();
       }
     }
-
   }
 
   async validateUserPassword(
