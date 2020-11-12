@@ -17,7 +17,11 @@ export class CreateEventDto {
   @IsNotEmpty()
   location: string;
 
-  @IsAlphanumeric()
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsAlphanumeric() // Cambiar to int
   @IsNotEmpty()
   nmax: number;
 

@@ -7,9 +7,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '../auth/user.entity';
 
 import { Comment } from '../comments/comments.entity';
+import { UserEvent } from '../userEvent/userEvent.entity';
 
 @Entity()
 export class Event extends BaseEntity {
@@ -37,16 +37,13 @@ export class Event extends BaseEntity {
   @Column()
   img: string;
 
-  //   @Column()
-  //   users: [Array]<UsersEventObject>;
-  //
-  //   @Column()
-  //   todos: Array<string>;
-
-  @ManyToMany(() => User)
+  @ManyToMany(() => UserEvent, { cascade: true })
   @JoinTable()
-  users: User[];
+  users: UserEvent[];
 
-  @OneToMany(() => Comment, (comment) => comment.event, { eager: true })
+  @OneToMany(() => Comment, (comment) => comment.event, {
+    eager: true,
+    cascade: true,
+  })
   comments: Comment[];
 }

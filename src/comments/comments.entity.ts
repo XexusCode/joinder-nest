@@ -18,6 +18,6 @@ export class Comment extends BaseEntity {
   @Column()
   date: number;
 
-  @ManyToOne(() => Event, (event) => event.comments, { cascade: true })
+  @ManyToOne(() => Event, (event) => event.comments, { onDelete: 'CASCADE' })
   event: Event;
 }

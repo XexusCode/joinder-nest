@@ -20,6 +20,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { Comment } from '../comments/comments.entity';
 import { CommentsService } from '../comments/comments.service';
+import { UserEvent } from '../userEvent/userEvent.entity';
 
 @Controller('events')
 @UseGuards(AuthGuard('jwt'))
@@ -44,10 +45,29 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
   ): Promise<Event> {
-    return this.eventsService.getEventById(id, user);
+    return this.eventsService.getEventByIdWithUser(id, user);
   }
 
-  @Post(':id/addcomment')
+  @Delete('/:id')
+  async deleteEvent(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<void> {
+    const event = await this.getEventById(id, user);
+    return this.eventsService.deleteEvent(event);
+  }
+
+  @Patch('/:id')
+  async updateEvent(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+    @Body() createEventDto: CreateEventDto,
+  ): Promise<Event> {
+    const event = await this.getEventById(id, user);
+    return this.eventsService.updateEvent(event, createEventDto);
+  }
+
+  @Post(':id/comment')
   @UsePipes(ValidationPipe)
   async addComment(
     @Param('id', ParseIntPipe) id: number,
@@ -55,6 +75,7 @@ export class EventsController {
     @Body() createCommentDto: CreateCommentDto,
   ): Promise<Comment> {
     const event = await this.getEventById(id, user);
+    console.log('prueba evento', event);
     return this.commentService.addComment(createCommentDto, event);
   }
 
@@ -81,5 +102,55 @@ export class EventsController {
       idComment,
       createCommentDto,
     );
+  }
+
+  @Post(':id/user')
+  @UsePipes(ValidationPipe)
+  async joinUser(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.eventsService.joinUser(id, user);
+  }
+
+  @Get(':id/user/')
+  async getAllUser(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<UserEvent[]> {
+    const event = await this.getEventById(id, user);
+    return this.eventsService.getAllUser(event);
+  }
+
+  @Get(':id/user/:userId')
+  async getUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: User,
+  ): Promise<UserEvent> {
+    const event = await this.getEventById(id, user);
+    return this.eventsService.getUser(event, userId);
+  }
+
+  @Delete(':id/user/:userId')
+  @UsePipes(ValidationPipe)
+  async deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: User,
+  ): Promise<void> {
+    const event = await this.getEventById(id, user);
+    return this.eventsService.deleteUser(userId, event);
+  }
+
+  @Patch(':id/user/:userId')
+  @UsePipes(ValidationPipe)
+  async UpdateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @GetUser() user: User,
+  ): Promise<void> {
+    const event = await this.getEventById(id, user);
+    return this.eventsService.updateUser(userId, event);
   }
 }
