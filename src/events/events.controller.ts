@@ -20,7 +20,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { Comment } from '../comments/comments.entity';
 import { CommentsService } from '../comments/comments.service';
-import { UserEvent } from '../userEvent/userEvent.entity';
 
 @Controller('events')
 @UseGuards(AuthGuard('jwt'))
@@ -35,8 +34,7 @@ export class EventsController {
   createEvent(
     @Body() createEventDto: CreateEventDto,
     @GetUser() user: User,
-  ): Promise<Event> {
-    console.log('user:', user);
+  ): Promise<void> {
     return this.eventsService.createEvent(createEventDto, user);
   }
 
@@ -75,7 +73,6 @@ export class EventsController {
     @Body() createCommentDto: CreateCommentDto,
   ): Promise<Comment> {
     const event = await this.getEventById(id, user);
-    console.log('prueba evento', event);
     return this.commentService.addComment(createCommentDto, event);
   }
 
@@ -117,7 +114,7 @@ export class EventsController {
   async getAllUser(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
-  ): Promise<UserEvent[]> {
+  ): Promise<User[]> {
     const event = await this.getEventById(id, user);
     return this.eventsService.getAllUser(event);
   }
@@ -127,7 +124,7 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) userId: number,
     @GetUser() user: User,
-  ): Promise<UserEvent> {
+  ): Promise<User> {
     const event = await this.getEventById(id, user);
     return this.eventsService.getUser(event, userId);
   }

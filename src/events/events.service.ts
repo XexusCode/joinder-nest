@@ -4,38 +4,38 @@ import { EventRepository } from './event.repository';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Event } from './event.entity';
 import { User } from '../auth/user.entity';
-import { UserEvent } from '../userEvent/userEvent.entity';
+import { UserEventRepository } from '../UserEvent/userEvent.repository';
 
 @Injectable()
 export class EventService {
   constructor(
     @InjectRepository(EventRepository)
     private eventRepository: EventRepository,
+    private userEventRepository: UserEventRepository,
   ) {}
 
-  async createEvent(
-    createEventDto: CreateEventDto,
-    user: User,
-  ): Promise<Event> {
-    return this.eventRepository.createEvent(createEventDto, user);
+  async createEvent(createEventDto: CreateEventDto, user: User): Promise<void> {
+    const event = await this.eventRepository.createEvent(createEventDto, user);
+
+    this.userEventRepository.createUserEvent(user, event);
   }
 
   async getEventByIdWithUser(id: number, user: User): Promise<Event> {
     const event = await this.eventRepository
       .createQueryBuilder('event')
-      .leftJoinAndSelect('event.users', 'userEvent')
-      .where(`event.id = ${id} `)
+      .leftJoinAndSelect('event.userEvents', 'userEvent')
       .getOne();
-
-    const exist = await this.eventRepository
-      .createQueryBuilder('event')
-      .leftJoinAndSelect('event.users', 'userEvent')
-      .where(`event.id = ${id} AND userEvent.id = ${user.id}`)
-      .getOne();
-
-    if (!event || !exist) {
-      throw new NotFoundException(`Task with ID "${id}" not found`);
-    }
+    console.log('prueba', event);
+    //
+    // const exist = await this.eventRepository
+    //   .createQueryBuilder('event')
+    //   .leftJoinAndSelect('event.UserEvents', 'userEvent')
+    //   .where(`event.id = ${id} AND userEvent.id = ${user.id}`)
+    //   .getOne();
+    //
+    // if (!event || !exist) {
+    //   throw new NotFoundException(`Task with ID "${id}" not found`);
+    // }
 
     return event;
   }
@@ -76,14 +76,10 @@ export class EventService {
 
   async joinUser(id: number, user: User) {
     const event = await this.getEventByIdWithoutUser(id);
-    const userEvent = new UserEvent();
 
-    userEvent.id = user.id;
-    userEvent.username = user.username;
-    userEvent.color = 'generarcolor';
-    userEvent.rank = 3;
+    this.userEventRepository.createUserEvent(user, event);
 
-    event.users.push(userEvent);
+    event.users.push(user);
 
     this.eventRepository.save(event);
   }
@@ -96,7 +92,7 @@ export class EventService {
     this.eventRepository.save(event);
   }
 
-  getUser(event: Event, userId: number): UserEvent {
+  getUser(event: Event, userId: number): User {
     const user = event.users.find((user) => user.id === userId);
 
     if (!user) {
@@ -105,13 +101,13 @@ export class EventService {
     return user;
   }
 
-  getAllUser(event: Event): UserEvent[] {
+  getAllUser(event: Event): User[] {
     return event.users;
   }
 
   updateUser(userId: number, event: Event) {
     const user = this.getUser(event, userId);
-    user.color = 'Cambio de color';
+    // user.color = 'Cambio de color';
 
     event.users.splice(event.users.indexOf(user), 1, user);
 
