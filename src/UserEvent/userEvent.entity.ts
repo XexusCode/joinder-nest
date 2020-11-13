@@ -1,17 +1,21 @@
 import {
   BaseEntity,
-  Entity,
   Column,
+  Entity,
+  ManyToOne,
   PrimaryColumn,
-  ManyToMany,
-  JoinTable,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Event } from '../events/event.entity';
+import { User } from '../auth/user.entity';
 
 @Entity()
 export class UserEvent extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
+
+  @ManyToOne(() => User, (event) => event.id, { onDelete: 'CASCADE' })
+  user: User;
 
   @Column()
   username: string;
@@ -22,7 +26,6 @@ export class UserEvent extends BaseEntity {
   @Column()
   color: string;
 
-  @ManyToMany(() => Event, { cascade: true })
-  @JoinTable()
-  events: Event[];
+  @ManyToOne(() => Event, (event) => event.userEvents)
+  event: Event;
 }
