@@ -35,7 +35,7 @@ export class EventRepository extends Repository<Event> {
       .leftJoinAndSelect('event.userEvents', 'userEvent')
       .leftJoinAndSelect('event.comments', 'comment')
       .leftJoinAndSelect('event.todos', 'todo')
-      .where(`event.id = ${id}`) //user.username = "${username}" AND
+      .where(`event.id = ${id}`)
       .getOne();
   }
 }

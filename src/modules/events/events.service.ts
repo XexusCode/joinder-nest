@@ -28,8 +28,8 @@ export class EventService {
     return await this.eventRepository.createEvent(eventEntity);
   }
 
-  async getEventByIdWithUser(id: number, username: string): Promise<Event> {
-    const event = await this.eventRepository.getEventByIdWithUser(id, username);
+  async getEventById(id: number): Promise<Event> {
+    const event = await this.eventRepository.getEventByIdWithUser(id);
 
     if (!event) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
@@ -47,7 +47,7 @@ export class EventService {
   }
 
   async deleteEvent(id: number, username: string): Promise<string> {
-    const event = await this.getEventByIdWithUser(id, username);
+    const event = await this.getEventById(id);
     await this.validateEvent(id, username);
     const allowed = await this.checkPermission(event, username);
 
@@ -65,7 +65,7 @@ export class EventService {
     createEventDto: EventDto,
   ): Promise<Event> {
     const newEvent = await EventMapping.toEntity(createEventDto);
-    const event = await this.getEventByIdWithUser(id, username);
+    const event = await this.getEventById(id);
     await this.validateEvent(id, username);
     const allowed = this.checkPermission(event, username);
 
@@ -95,7 +95,7 @@ export class EventService {
   }
 
   async validateEvent(id: number, username: string): Promise<boolean> {
-    const event = await this.getEventByIdWithUser(id, username);
+    const event = await this.getEventById(id);
 
     if (
       event.userEvents.some(
@@ -110,6 +110,6 @@ export class EventService {
 
   async getEvent(id: number, username: string) {
     await this.validateEvent(id, username);
-    return this.getEventByIdWithUser(id, username);
+    return this.getEventById(id);
   }
 }

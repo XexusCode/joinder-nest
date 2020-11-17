@@ -21,7 +21,7 @@ export class TodosService {
   async addTodo(todoDto: TodoDto, id: number, username: string): Promise<Todo> {
     await this.eventService.validateEvent(id, username);
 
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    const event = await this.eventService.getEventById(id);
     const todo = await TodosMapping.toEntity(todoDto, event);
     return this.todoRepository.createTodo(todo);
   }
@@ -29,7 +29,7 @@ export class TodosService {
   async getAllTodos(id: number, username: string): Promise<Todo[]> {
     await this.eventService.validateEvent(id, username);
 
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    const event = await this.eventService.getEventById(id);
 
     return event.todos;
   }
@@ -56,7 +56,7 @@ export class TodosService {
   ) {
     await this.eventService.validateEvent(id, username);
 
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    const event = await this.eventService.getEventById(id);
 
     const oldTodo = await this.todoRepository.getTodo(idTodo);
     const newTodo = await TodosMapping.toEntity(todoDto, event);

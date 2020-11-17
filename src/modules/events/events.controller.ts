@@ -44,7 +44,7 @@ export class EventsController {
     @Body() createEventDto: EventDto,
     @GetUser() user: User,
   ): Promise<Event> {
-    const event = await this.eventsService.createEvent(createEventDto, user);
+    const event = await this.eventsService.createEvent(createEventDto);
     this.userEventService.joinUser(event.id, user, true);
     return event;
   }

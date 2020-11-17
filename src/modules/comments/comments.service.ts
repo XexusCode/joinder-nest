@@ -23,7 +23,7 @@ export class CommentsService {
     username: string,
   ): Promise<Comment> {
     await this.eventService.validateEvent(id, username);
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    const event = await this.eventService.getEventById(id);
     const userEvent = await this.userEventService.getUser(
       id,
       username,
@@ -54,7 +54,7 @@ export class CommentsService {
   ): Promise<CommentDto> {
     await this.eventService.validateEvent(id, username);
 
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    const event = await this.eventService.getEventById(id);
     const userEvent = await this.userEventService.getUser(
       id,
       username,
@@ -79,7 +79,9 @@ export class CommentsService {
   }
 
   async getAllComments(id: number, username: string): Promise<Comment[]> {
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    await this.eventService.validateEvent(id, username);
+
+    const event = await this.eventService.getEventById(id);
     return event.comments;
   }
 }

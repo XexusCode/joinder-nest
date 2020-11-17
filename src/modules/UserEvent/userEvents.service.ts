@@ -65,7 +65,7 @@ export class UserEventService {
     )
       throw new UnauthorizedException();
 
-    let event = await this.eventService.getEventByIdWithUser(id, user.username);
+    let event = await this.eventService.getEventById(id);
     this.eventService.validateEvent(id, userEventToDelete.username);
     event.users = event.users.filter((user) => user.id !== user.id);
     this.eventRepository.save(event);
@@ -89,7 +89,7 @@ export class UserEventService {
   async getAllUser(id: number, username: string): Promise<UserEvent[]> {
     await this.eventService.validateEvent(id, username);
 
-    const event = await this.eventService.getEventByIdWithUser(id, username);
+    const event = await this.eventService.getEventById(id);
 
     return event.userEvents;
   }
@@ -121,6 +121,6 @@ export class UserEventService {
     )
       throw new UnauthorizedException();
 
-    this.userEventRepository.updateUserEvent(userEventUpdated, userEventTarget);
+    this.userEventRepository.updateUserEvent(userEventUpdated);
   }
 }
