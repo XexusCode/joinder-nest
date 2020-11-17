@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { EventsModule } from './events/events.module';
-import { AuthModule } from './auth/auth.module';
+import { EventsModule } from './modules/events/events.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
-import { CommentsModule } from './comments/comments.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { TodosModule } from './modules/todos/todos.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { CommentsModule } from './comments/comments.module';
     EventsModule,
     AuthModule,
     CommentsModule,
+    TodosModule,
   ],
 })
 export class AppModule {}

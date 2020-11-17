@@ -6,3 +6,13 @@ C
 
 docker run --name phpmyadmin -d -e PMA_HOST=host.docker.internal -e PMA_PORT=3306 -e PMA_USER=root -e PMA_PASSWORD=cuatroochenta -p 7000:80 --restart=unless-stopped phpmyadmin/phpmyadmin:5
 
+    EventMapping.toEntity(createEventDto, user)
+      .then((event: Event) =>
+        EventMapping.toUserEvent(user, event)
+          .then((userEvent) =>
+            this.userEventRepository.createUserEvent(userEvent),
+          )
+          .then((userEvent) => (event.userEvents = [userEvent]))
+          .then(() => this.eventRepository.createEvent(event)),
+      )
+      .then((event) => console.log(event));
