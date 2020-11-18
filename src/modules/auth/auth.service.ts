@@ -37,12 +37,13 @@ export class AuthService {
 
   async signIn(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ result: string; message: string }> {
+  ): Promise<{
+    result: { uid: number; accesstoken: string; username: string };
+    message: string;
+  }> {
     const { username } = authCredentialsDto;
 
-    const user = await this.userRepository.getUserFromUsername(
-      authCredentialsDto,
-    );
+    const user = await this.userRepository.getUserFromUsername(username);
 
     if (!user) {
       throw new UnauthorizedException(typesMessages.INVALIDCREDENTIALS);
@@ -54,8 +55,12 @@ export class AuthService {
       const payload: JwtPayload = { username };
 
       return {
-        result: this.jwtService.sign(payload),
-        message: typesMessages.LOGIN,
+        result: {
+          accesstoken: this.jwtService.sign(payload),
+          uid: user.id,
+          username: user.username,
+        },
+        message: 'prueba',
       };
     }
   }
@@ -63,5 +68,26 @@ export class AuthService {
   async validatePassword(password: string, user: User): Promise<boolean> {
     const hash = await bcrypt.hash(password, user.salt);
     return hash === user.password;
+  }
+
+  async renew(user: User) {
+    const userDatabase = await this.userRepository.getUserFromUsername(
+      user.username,
+    );
+    const { username } = user;
+
+    if (user.password !== userDatabase.password)
+      throw new UnauthorizedException();
+
+    const payload: JwtPayload = { username };
+
+    return {
+      result: {
+        accesstoken: this.jwtService.sign(payload),
+        uid: user.id,
+        username: user.username,
+      },
+      message: `${typesMessages.LOGIN}`,
+    };
   }
 }

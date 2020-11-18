@@ -13,4 +13,13 @@ export class AuthMapping {
 
     return user;
   }
+
+  static async toAuthCredentials(user: User): Promise<AuthCredentialsDto> {
+    const authCredentialsDto = new AuthCredentialsDto();
+
+    authCredentialsDto.username = user.username;
+    authCredentialsDto.password = user.password;
+
+    return authCredentialsDto;
+  }
 }
