@@ -8,7 +8,6 @@ export class TodoRepository extends Repository<Todo> {
   }
 
   getTodo(idTodo: number): Promise<Todo> {
-    console.log(this);
     return this.findOne({ id: idTodo });
   }
 

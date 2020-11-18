@@ -11,30 +11,39 @@ import { Comment } from '../../comments/entity/comments.entity';
 import { User } from '../../auth/entity/user.entity';
 import { UserEvent } from '../../UserEvent/userEvent.entity';
 import { Todo } from '../../todos/entity/todo.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Event extends BaseEntity {
+  @ApiProperty()
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty()
   @Column()
   title: string;
 
+  @ApiProperty()
   @Column()
   description: string;
 
+  @ApiProperty()
   @Column()
   nmax: number;
 
+  @ApiProperty()
   @Column()
   startDate: number;
 
+  @ApiProperty()
   @Column()
   endDate: number;
 
+  @ApiProperty()
   @Column()
   location: string;
 
+  @ApiProperty()
   @Column()
   img: string;
 
@@ -44,15 +53,18 @@ export class Event extends BaseEntity {
   @OneToMany(() => Comment, (comment) => comment.event, {
     eager: true,
   })
+  @ApiProperty({ type: () => Comment })
   comments: Comment[];
 
   @OneToMany(() => UserEvent, (userEvent) => userEvent.event, {
     onDelete: 'CASCADE',
   })
+  @ApiProperty({ type: () => UserEvent })
   userEvents: UserEvent[];
 
   @OneToMany(() => Todo, (todo) => todo.event, {
     eager: true,
   })
+  @ApiProperty({ type: () => Todo })
   todos: Todo[];
 }

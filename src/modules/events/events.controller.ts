@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -26,8 +27,9 @@ import { UserEventService } from '../UserEvent/userEvents.service';
 import { TodoDto } from '../todos/dto/todo.dto';
 import { TodosService } from '../todos/todos.service';
 import { Todo } from '../todos/entity/todo.entity';
-import { DeleteResult } from 'typeorm';
-
+import { ApiCreatedResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { TransformInterceptor } from '../../interceptor/transform.interceptor';
+@UseInterceptors(TransformInterceptor)
 @Controller('events')
 @UseGuards(AuthGuard('jwt'))
 export class EventsController {
@@ -38,92 +40,114 @@ export class EventsController {
     private todoService: TodosService,
   ) {}
 
+  @ApiTags('Events')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: User,
+  })
   @Post()
   @UsePipes(ValidationPipe)
   async createEvent(
     @Body() createEventDto: EventDto,
     @GetUser() user: User,
-  ): Promise<Event> {
-    const event = await this.eventsService.createEvent(createEventDto);
+  ): Promise<{ result: Event; message: string }> {
+    const { event, message } = await this.eventsService.createEvent(
+      createEventDto,
+    );
     this.userEventService.joinUser(event.id, user, true);
-    return event;
+    return { message, result: event };
   }
-
+  @ApiTags('Events')
   @Get()
-  getAllEvents(@GetUser() { username }): Promise<Array<Event>> {
-    return this.eventsService.getAllEvents(username);
+  async getAllEvents(
+    @GetUser() { username },
+  ): Promise<{ result: Array<Event>; message: string }> {
+    return await this.eventsService.getAllEvents(username);
   }
 
+  @ApiTags('Events')
   @Get('/:id')
   getEventById(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
-  ): Promise<Event> {
+  ): Promise<{ result: Event; message: string }> {
     return this.eventsService.getEvent(id, username);
   }
 
+  @ApiTags('Events')
   @Delete('/:id')
   async deleteEvent(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
-  ): Promise<string> {
+  ): Promise<{ message: string }> {
     return this.eventsService.deleteEvent(id, username);
   }
 
+  @ApiTags('Events')
   @Patch('/:id')
   async updateEvent(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
     @Body() createEventDto: EventDto,
-  ): Promise<Event> {
+  ): Promise<{ message: string }> {
     return this.eventsService.updateEvent(id, username, createEventDto);
   }
 
-  @Post(':id/user')
+  @ApiTags('UserEvent')
+  @Post(':id/userEvent')
+  @ApiResponse({
+    status: 201,
+    description: 'The record has been successfully created.',
+    type: UserEvent,
+  })
   @UsePipes(ValidationPipe)
   async joinUser(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     return this.userEventService.joinUser(id, user, false);
   }
 
-  @Get(':id/user/')
+  @ApiTags('UserEvent')
+  @Get(':id/userEvent/')
   async getAllUser(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
-  ): Promise<UserEvent[]> {
+  ): Promise<{ result: UserEvent[]; message: string }> {
     return this.userEventService.getAllUser(id, username);
   }
 
-  @Get(':id/user/:targetUsername')
+  @ApiTags('UserEvent')
+  @Get(':id/userEvent/:targetUsername')
   async getUser(
     @Param('id', ParseIntPipe) id: number,
     @Param('targetUsername') targetUsername: string,
     @GetUser() { username },
-  ): Promise<UserEvent> {
+  ): Promise<{ result: UserEvent; message: string }> {
     return this.userEventService.getUser(id, targetUsername, username);
   }
 
-  @Delete(':id/user/:targetUsername')
-  @UsePipes(ValidationPipe)
+  @ApiTags('UserEvent')
+  @Delete(':id/userEvent/:targetUsername')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
     @Param('targetUsername') targetUsername: string,
 
     @GetUser() user: User,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     return this.userEventService.deleteUser(id, targetUsername, user);
   }
 
-  @Patch(':id/user/:targetUsername')
+  @ApiTags('UserEvent')
+  @Patch(':id/userEvent/:targetUsername')
   @UsePipes(ValidationPipe)
   async UpdateUser(
     @Param('id', ParseIntPipe) id: number,
     @Param('targetUsername') targetUsername: string,
+
     @Body() userEventDto: UserEventDto,
     @GetUser() user: User,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     return this.userEventService.updateUser(
       id,
       targetUsername,
@@ -132,50 +156,53 @@ export class EventsController {
     );
   }
 
+  @ApiTags('Comments')
   @Post(':id/comment')
   @UsePipes(ValidationPipe)
   async addComment(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
     @Body() commentDto: CommentDto,
-  ): Promise<Comment> {
+  ): Promise<{ message: string }> {
     return this.commentService.addComment(commentDto, id, username);
   }
-
+  @ApiTags('Comments')
   @Get(':id/comment')
   @UsePipes(ValidationPipe)
   async getAllComments(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
-  ): Promise<Comment[]> {
+  ): Promise<{ result: Comment[]; message: string }> {
     return this.commentService.getAllComments(id, username);
   }
 
+  @ApiTags('Comments')
   @Get('/:id/comment/:idComment/')
   async getComment(
     @Param('id', ParseIntPipe) id: number,
     @Param('idComment', ParseIntPipe) idComment: number,
     @GetUser() { username },
-  ): Promise<Comment> {
+  ): Promise<{ result: Comment; message: string }> {
     return this.commentService.getComment(id, username, idComment);
   }
-
+  @ApiTags('comments')
   @Delete('/:id/comment/:idComment/')
   async deleteComment(
     @Param('id', ParseIntPipe) id: number,
     @Param('idComment', ParseIntPipe) idComment: number,
     @GetUser() { username },
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     return this.commentService.deleteComment(id, username, idComment);
   }
-
+  @ApiTags('Comments')
+  @UsePipes(ValidationPipe)
   @Patch('/:id/comment/:idComment/')
   async updateComment(
     @Param('id', ParseIntPipe) id: number,
     @Param('idComment', ParseIntPipe) idComment: number,
     @GetUser() { username },
     @Body() createCommentDto: CommentDto,
-  ): Promise<CommentDto> {
+  ): Promise<{ message: string }> {
     return this.commentService.updateComment(
       id,
       username,
@@ -183,50 +210,52 @@ export class EventsController {
       createCommentDto,
     );
   }
+  @ApiTags('Todos')
   @Post(':id/todo')
   @UsePipes(ValidationPipe)
   async addTodo(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
     @Body() todoDto: TodoDto,
-  ): Promise<Todo> {
+  ): Promise<{ message: string }> {
     return this.todoService.addTodo(todoDto, id, username);
   }
-
+  @ApiTags('Todos')
   @Get(':id/todo')
   @UsePipes(ValidationPipe)
   async getAllTodos(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
-  ): Promise<Todo[]> {
+  ): Promise<{ result: Todo[]; message: string }> {
     return this.todoService.getAllTodos(id, username);
   }
-
+  @ApiTags('Todos')
   @Get('/:id/todo/:idTodo/')
   async getTodo(
     @Param('id', ParseIntPipe) id: number,
     @Param('idTodo', ParseIntPipe) idTodo: number,
     @GetUser() { username },
-  ): Promise<Todo> {
+  ): Promise<{ result: Todo; message: string }> {
     return this.todoService.getTodo(id, username, idTodo);
   }
-
+  @ApiTags('Todos')
   @Delete('/:id/todo/:idTodo/')
   async deleteTodo(
     @Param('id', ParseIntPipe) id: number,
     @Param('idTodo', ParseIntPipe) idTodo: number,
     @GetUser() { username },
-  ): Promise<DeleteResult> {
+  ): Promise<{ message: string }> {
     return this.todoService.deleteTodo(id, username, idTodo);
   }
-
+  @ApiTags('Todos')
   @Patch('/:id/todo/:idTodo/')
+  @UsePipes(ValidationPipe)
   async updateTodo(
     @Param('id', ParseIntPipe) id: number,
     @Param('idTodo', ParseIntPipe) idTodo: number,
     @GetUser() { username },
     @Body() todoDto: TodoDto,
-  ): Promise<Todo> {
+  ): Promise<{ message: string }> {
     return this.todoService.updateTodo(id, username, idTodo, todoDto);
   }
 }

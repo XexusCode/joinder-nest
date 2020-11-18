@@ -1,24 +1,17 @@
 import { Repository, EntityRepository } from 'typeorm';
-import {
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 
 import { User } from '../entity/user.entity';
 import { AuthCredentialsDto } from '../dto/auth-credentials.dto';
+import { typesMessages } from '../types/types.messages';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  async signUp(user: User): Promise<string> {
+  async signUp(user: User): Promise<User> {
     try {
-      await user.save();
-      return 'Success';
-    } catch (error) {
-      if (error.code === '23505') {
-        throw new ConflictException('El usuario ya existe');
-      } else {
-        throw new InternalServerErrorException();
-      }
+      return await user.save();
+    } catch {
+      throw new ConflictException(typesMessages.DUPLICATE);
     }
   }
 

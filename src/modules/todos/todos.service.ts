@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { TodoDto } from './dto/todo.dto';
 import { TodosMapping } from './todosMapping/todosMapping';
 
 import { EventService } from '../events/events.service';
 import { TodoRepository } from './repository/todo.repository';
 import { Todo } from './entity/todo.entity';
-import { Connection, DeleteResult } from 'typeorm';
+import { Connection } from 'typeorm';
+import { typesMessages } from '../auth/types/types.messages';
 
 @Injectable()
 export class TodosService {
@@ -18,34 +19,67 @@ export class TodosService {
     this.todoRepository = this.connection.getCustomRepository(TodoRepository);
   }
 
-  async addTodo(todoDto: TodoDto, id: number, username: string): Promise<Todo> {
+  async addTodo(
+    todoDto: TodoDto,
+    id: number,
+    username: string,
+  ): Promise<{ message: string }> {
     await this.eventService.validateEvent(id, username);
 
     const event = await this.eventService.getEventById(id);
     const todo = await TodosMapping.toEntity(todoDto, event);
-    return this.todoRepository.createTodo(todo);
+    this.todoRepository.createTodo(todo);
+
+    return {
+      message: `${typesMessages.TODO} ${typesMessages.CREATED}`,
+    };
   }
 
-  async getAllTodos(id: number, username: string): Promise<Todo[]> {
+  async getAllTodos(
+    id: number,
+    username: string,
+  ): Promise<{ result: Todo[]; message: string }> {
     await this.eventService.validateEvent(id, username);
 
     const event = await this.eventService.getEventById(id);
 
-    return event.todos;
+    return {
+      result: event.todos,
+      message: '',
+    };
   }
-  async getTodo(id: number, username: string, idTodo: number): Promise<Todo> {
+  async getTodo(
+    id: number,
+    username: string,
+    idTodo: number,
+  ): Promise<{ result: Todo; message: string }> {
     await this.eventService.validateEvent(id, username);
-    return this.todoRepository.getTodo(idTodo);
+    const todo = await this.todoRepository.getTodo(idTodo);
+
+    if (!todo) throw new NotFoundException();
+
+    return {
+      result: todo,
+      message: '',
+    };
   }
 
   async deleteTodo(
     id: number,
     username: string,
     idTodo: number,
-  ): Promise<DeleteResult> {
+  ): Promise<{ message: string }> {
     await this.eventService.validateEvent(id, username);
 
-    return await this.todoRepository.deleteTodo(idTodo);
+    const result = await this.todoRepository.deleteTodo(idTodo);
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+
+    return {
+      message: `${typesMessages.TODO} ${idTodo} ${typesMessages.DELETED}`,
+    };
   }
 
   async updateTodo(
@@ -58,11 +92,19 @@ export class TodosService {
 
     const event = await this.eventService.getEventById(id);
 
-    const oldTodo = await this.todoRepository.getTodo(idTodo);
+    const { result: oldTodo } = await this.getTodo(id, username, idTodo);
     const newTodo = await TodosMapping.toEntity(todoDto, event);
     newTodo.id = oldTodo.id;
 
-    await this.todoRepository.update({ id: idTodo }, newTodo);
-    return newTodo;
+    if (!oldTodo) throw new NotFoundException();
+
+    const result = await this.todoRepository.update({ id: idTodo }, newTodo);
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+    return {
+      message: `${typesMessages.TODO} ${idTodo} ${typesMessages.UPDATED}`,
+    };
   }
 }

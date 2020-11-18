@@ -1,12 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from './repository/user.repository';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { JwtPayload } from './interfaces/jwt.payload.interface';
+import { JwtPayload } from './interfaces/auth.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { AuthMapping } from './authMapping/AuthMapping';
 import * as bcrypt from 'bcrypt';
 import { User } from './entity/user.entity';
+import { typesMessages } from './types/types.messages';
 
 @Injectable()
 export class AuthService {
@@ -16,14 +21,23 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<string> {
+  async signUp(
+    authCredentialsDto: AuthCredentialsDto,
+  ): Promise<{ message: string }> {
     const user = await AuthMapping.toEntity(authCredentialsDto);
-    return this.userRepository.signUp(user);
+
+    const result = await this.userRepository.signUp(user);
+
+    if (!result) throw new ConflictException(typesMessages.DUPLICATE);
+    else
+      return {
+        message: `${typesMessages.USER} ${authCredentialsDto.username} ${typesMessages.REGISTER}`,
+      };
   }
 
   async signIn(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ result: string; message: string }> {
     const { username } = authCredentialsDto;
 
     const user = await this.userRepository.getUserFromUsername(
@@ -31,16 +45,18 @@ export class AuthService {
     );
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(typesMessages.INVALIDCREDENTIALS);
     }
 
     if (!(await this.validatePassword(authCredentialsDto.password, user))) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(typesMessages.INVALIDCREDENTIALS);
     } else {
       const payload: JwtPayload = { username };
-      const accessToken = await this.jwtService.sign(payload);
 
-      return { accessToken };
+      return {
+        result: this.jwtService.sign(payload),
+        message: typesMessages.LOGIN,
+      };
     }
   }
 

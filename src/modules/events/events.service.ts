@@ -10,6 +10,7 @@ import { UserEventRepository } from '../UserEvent/repository/userEvent.repositor
 import { EventMapping } from './eventMapping/EventMapping';
 import { Connection } from 'typeorm';
 import { UserRepository } from '../auth/repository/user.repository';
+import { typesMessages } from '../auth/types/types.messages';
 
 @Injectable()
 export class EventService {
@@ -23,16 +24,22 @@ export class EventService {
       UserEventRepository,
     );
   }
-  async createEvent(createEventDto: EventDto): Promise<Event> {
+  async createEvent(
+    createEventDto: EventDto,
+  ): Promise<{ event: Event; message: typesMessages }> {
     const eventEntity = await EventMapping.toEntity(createEventDto);
-    return await this.eventRepository.createEvent(eventEntity);
+    const event = await this.eventRepository.createEvent(eventEntity);
+    const message = typesMessages.EVENTCREATED;
+    return { event, message };
   }
 
   async getEventById(id: number): Promise<Event> {
     const event = await this.eventRepository.getEventByIdWithUser(id);
 
     if (!event) {
-      throw new NotFoundException(`Task with ID "${id}" not found`);
+      throw new NotFoundException(
+        `${typesMessages.EVENT}"${id}" ${typesMessages.NOTFOUND}`,
+      );
     }
     return event;
   }
@@ -41,19 +48,26 @@ export class EventService {
     const event = await this.eventRepository.getEventByIdWithoutUser(id);
 
     if (!event) {
-      throw new NotFoundException(`Task with ID "${id}" not found`);
+      throw new NotFoundException(
+        `${typesMessages.EVENT} "${id}" ${typesMessages.NOTFOUND}`,
+      );
     }
     return event;
   }
 
-  async deleteEvent(id: number, username: string): Promise<string> {
+  async deleteEvent(
+    id: number,
+    username: string,
+  ): Promise<{ message: string }> {
     const event = await this.getEventById(id);
     await this.validateEvent(id, username);
     const allowed = await this.checkPermission(event, username);
 
     if (allowed) {
       this.eventRepository.remove(event);
-      return `El evento ${id} ha sido borrado satisfactoriamente`;
+      return {
+        message: `${typesMessages.EVENT} ${id} ${typesMessages.DELETED}`,
+      };
     } else {
       throw new UnauthorizedException();
     }
@@ -63,7 +77,7 @@ export class EventService {
     id: number,
     username: string,
     createEventDto: EventDto,
-  ): Promise<Event> {
+  ): Promise<{ message: string }> {
     const newEvent = await EventMapping.toEntity(createEventDto);
     const event = await this.getEventById(id);
     await this.validateEvent(id, username);
@@ -71,7 +85,11 @@ export class EventService {
 
     if (allowed) {
       newEvent.id = id;
-      return await this.eventRepository.save(newEvent);
+      await this.eventRepository.save(newEvent);
+
+      return {
+        message: `${typesMessages.EVENT} ${id} ${typesMessages.UPDATED}`,
+      };
     } else {
       throw new UnauthorizedException();
     }
@@ -80,8 +98,9 @@ export class EventService {
   async getAllEvents(username: string) {
     const events = await this.eventRepository.getAllEvents(username);
     events.map((event) => delete event.users);
-
-    return events;
+    const message = '';
+    const result = events;
+    return { result, message };
   }
 
   private checkPermission(event: Event, username: string) {
@@ -110,6 +129,8 @@ export class EventService {
 
   async getEvent(id: number, username: string) {
     await this.validateEvent(id, username);
-    return this.getEventById(id);
+    const result = await this.getEventById(id);
+    const message = '';
+    return { result, message };
   }
 }

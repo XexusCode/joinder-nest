@@ -13,6 +13,7 @@ import { UserEvent } from './userEvent.entity';
 import { EventRepository } from '../events/repository/event.repository';
 import { Connection } from 'typeorm';
 import { EventService } from '../events/events.service';
+import { typesMessages } from '../auth/types/types.messages';
 
 @Injectable()
 export class UserEventService {
@@ -31,7 +32,11 @@ export class UserEventService {
     this.eventService = eventService;
   }
 
-  async joinUser(id: number, user: User, admin: boolean) {
+  async joinUser(
+    id: number,
+    user: User,
+    admin: boolean,
+  ): Promise<{ message: string }> {
     const event = await this.eventService.getEventByIdWithoutUser(id);
     const userEvent = await EventMapping.toUserEvent(user, event, admin);
 
@@ -45,21 +50,31 @@ export class UserEventService {
     this.userEventRepository.createUserEvent(userEvent);
     event.users.push(user);
     this.eventRepository.save(event);
+    return {
+      message: `${typesMessages.USER} ${userEvent.username} ${typesMessages.JOINED}`,
+    };
   }
 
-  async deleteUser(id: number, userUsername: string, user: User) {
-    const userEventToDelete = await this.getUser(
+  async deleteUser(
+    id: number,
+    userUsername: string,
+    user: User,
+  ): Promise<{ message: string }> {
+    const { result: userEventToDelete } = await this.getUser(
       id,
       userUsername,
       user.username,
     );
-    const userEventTrigger = await this.getUser(
+    const { result: userEventTrigger } = await this.getUser(
       id,
       user.username,
       user.username,
     );
+
+    console.log('activador', userEventTrigger);
+    console.log('para elimanar', userEventToDelete);
     if (
-      userEventToDelete.rank > userEventTrigger.rank ||
+      userEventToDelete.rank < userEventTrigger.rank ||
       (userEventTrigger.rank === 3 &&
         userEventTrigger.username !== userEventToDelete.username)
     )
@@ -70,28 +85,41 @@ export class UserEventService {
     event.users = event.users.filter((user) => user.id !== user.id);
     this.eventRepository.save(event);
     this.userEventRepository.deleteUserEvent(userEventToDelete);
+
+    return {
+      message: `${typesMessages.USER} ${userEventToDelete.username} ${typesMessages.DELETED}`,
+    };
   }
 
   async getUser(
     id: number,
     userTarget: string,
     username: string,
-  ): Promise<UserEvent> {
+  ): Promise<{ result: UserEvent; message: string }> {
     await this.eventService.validateEvent(id, username);
     const userEvent = await this.userEventRepository.getUser(userTarget);
 
     if (!userEvent) {
       throw new NotFoundException(`User  "${userTarget}" not found`);
     }
-    return userEvent;
+    return {
+      message: '',
+      result: userEvent,
+    };
   }
 
-  async getAllUser(id: number, username: string): Promise<UserEvent[]> {
+  async getAllUser(
+    id: number,
+    username: string,
+  ): Promise<{ result: UserEvent[]; message: string }> {
     await this.eventService.validateEvent(id, username);
 
     const event = await this.eventService.getEventById(id);
 
-    return event.userEvents;
+    return {
+      message: '',
+      result: event.userEvents,
+    };
   }
 
   async updateUser(
@@ -99,16 +127,17 @@ export class UserEventService {
     targetUsername: string,
     user: User,
     userEventDto: UserEventDto,
-  ) {
+  ): Promise<{ message: string }> {
     await this.eventService.validateEvent(id, user.username);
 
-    const userEventTrigger = await this.getUser(
+    console.log(userEventDto);
+    const { result: userEventTrigger } = await this.getUser(
       id,
       user.username,
       user.username,
     );
     const userEventUpdated = await UserEventMapping.toEntity(userEventDto);
-    const userEventTarget = await this.getUser(
+    const { result: userEventTarget } = await this.getUser(
       id,
       targetUsername,
       user.username,
@@ -116,11 +145,14 @@ export class UserEventService {
 
     userEventUpdated.id = userEventTarget.id;
     if (
-      userEventTarget.rank > userEventTrigger.rank ||
+      userEventTarget.rank < userEventTrigger.rank ||
       userEventTrigger.rank === 3
     )
       throw new UnauthorizedException();
 
     this.userEventRepository.updateUserEvent(userEventUpdated);
+    return {
+      message: `${typesMessages.USER} ${userEventTarget.username} ${typesMessages.UPDATED}`,
+    };
   }
 }
