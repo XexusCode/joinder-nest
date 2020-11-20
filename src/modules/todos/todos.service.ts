@@ -23,14 +23,16 @@ export class TodosService {
     todoDto: TodoDto,
     id: number,
     username: string,
-  ): Promise<{ message: string }> {
+  ): Promise<{ result: Todo; message: string }> {
     await this.eventService.validateEvent(id, username);
 
     const event = await this.eventService.getEventById(id);
-    const todo = await TodosMapping.toEntity(todoDto, event);
-    this.todoRepository.createTodo(todo);
+    let todo = await TodosMapping.toEntity(todoDto, event);
+    todo = await this.todoRepository.createTodo(todo);
+    delete todo.event;
 
     return {
+      result: todo,
       message: `${typesMessages.TODO} ${typesMessages.CREATED}`,
     };
   }

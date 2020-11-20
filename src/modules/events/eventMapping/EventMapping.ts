@@ -10,7 +10,9 @@ export class EventMapping {
     event.title = eventCredentials.title;
     event.location = eventCredentials.location;
     event.nmax = eventCredentials.nmax;
-    event.description = eventCredentials.description || 'Description';
+    event.description =
+      eventCredentials.description ||
+      'Introduce aqui la descripcipción para quieras que tenga el evento';
     event.startDate = eventCredentials.startDate;
     event.endDate = eventCredentials.endDate;
     event.img = eventCredentials.img;
@@ -33,5 +35,20 @@ export class EventMapping {
     userEvent.user = user;
 
     return userEvent;
+  }
+
+  static async updateEvent(
+    createEventDto: EventDto,
+    event: Event,
+  ): Promise<Event> {
+    event.title = createEventDto.title;
+    event.description = createEventDto.description;
+    event.img = createEventDto.img;
+    event.startDate = createEventDto.startDate;
+    event.endDate = createEventDto.endDate;
+    event.location = createEventDto.location;
+    event.nmax = createEventDto.nmax;
+
+    return event;
   }
 }

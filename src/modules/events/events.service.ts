@@ -78,8 +78,8 @@ export class EventService {
     username: string,
     createEventDto: EventDto,
   ): Promise<{ message: string }> {
-    const newEvent = await EventMapping.toEntity(createEventDto);
     const event = await this.getEventById(id);
+    const newEvent = await EventMapping.updateEvent(createEventDto, event);
     await this.validateEvent(id, username);
     const allowed = this.checkPermission(event, username);
 
@@ -99,8 +99,9 @@ export class EventService {
     const events = await this.eventRepository.getAllEvents(username);
     events.map((event) => delete event.users);
     const message = '';
-    const result = events;
-    return { result, message };
+    events.map((event) => event.comments.reverse());
+
+    return { result: events, message };
   }
 
   private checkPermission(event: Event, username: string) {

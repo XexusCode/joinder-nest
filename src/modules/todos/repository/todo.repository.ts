@@ -3,8 +3,8 @@ import { Todo } from '../entity/todo.entity';
 
 @EntityRepository(Todo)
 export class TodoRepository extends Repository<Todo> {
-  createTodo(todo: Todo) {
-    return todo.save();
+  async createTodo(todo: Todo) {
+    return await todo.save();
   }
 
   getTodo(idTodo: number): Promise<Todo> {
