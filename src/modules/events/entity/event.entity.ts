@@ -33,11 +33,11 @@ export class Event extends BaseEntity {
 
   @ApiProperty()
   @Column()
-  startDate: number;
+  startDate: string;
 
   @ApiProperty()
   @Column()
-  endDate: number;
+  endDate: string;
 
   @ApiProperty()
   @Column()

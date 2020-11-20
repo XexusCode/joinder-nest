@@ -54,7 +54,12 @@ export class EventsController {
     const { event, message } = await this.eventsService.createEvent(
       createEventDto,
     );
-    this.userEventService.joinUser(event.id, user, true);
+    const { result } = await this.userEventService.joinUser(
+      event.id,
+      user,
+      true,
+    );
+    event.userEvents = [result.userEvents[0]];
     return { message, result: event };
   }
   @ApiTags('Events')
@@ -163,8 +168,8 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
     @Body() commentDto: CommentDto,
-  ): Promise<{ message: string }> {
-    return this.commentService.addComment(commentDto, id, username);
+  ): Promise<{ result: Comment; message: string }> {
+    return await this.commentService.addComment(commentDto, id, username);
   }
   @ApiTags('Comments')
   @Get(':id/comment')

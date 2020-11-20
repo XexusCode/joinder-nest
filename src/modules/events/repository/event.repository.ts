@@ -6,9 +6,7 @@ export class EventRepository extends Repository<Event> {
   async createEvent(event: Event): Promise<Event> {
     try {
       return event.save();
-    } catch (error) {
-      console.log('error :(:', error);
-    }
+    } catch (error) {}
 
     return event;
   }
@@ -16,6 +14,7 @@ export class EventRepository extends Repository<Event> {
   async getEventByIdWithoutUser(id: number): Promise<Event> {
     return await this.createQueryBuilder('event')
       .leftJoinAndSelect('event.users', 'user')
+
       .where(`event.id = ${id}`)
       .getOne();
   }

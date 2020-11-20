@@ -1,5 +1,4 @@
 import {
-  IsAlphanumeric,
   IsNotEmpty,
   IsString,
   MaxLength,
@@ -20,25 +19,20 @@ export class EventDto {
   @ApiProperty()
   location: string;
 
-  @IsString()
-  @IsNotEmpty()
   @ApiProperty()
   description: string;
 
-  @IsAlphanumeric() // Cambiar to int
   @IsNotEmpty()
   @ApiProperty()
   nmax: number;
 
-  @IsAlphanumeric()
   @IsNotEmpty()
   @ApiProperty()
-  startDate: number;
+  startDate: string;
 
-  @IsAlphanumeric()
   @IsNotEmpty()
   @ApiProperty()
-  endDate: number;
+  endDate: string;
 
   @IsString()
   @IsNotEmpty()

@@ -23,7 +23,7 @@ export class AuthService {
 
   async signUp(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ message: string }> {
+  ): Promise<{ result: User; message: string }> {
     const user = await AuthMapping.toEntity(authCredentialsDto);
 
     const result = await this.userRepository.signUp(user);
@@ -31,6 +31,7 @@ export class AuthService {
     if (!result) throw new ConflictException(typesMessages.DUPLICATE);
     else
       return {
+        result,
         message: `${typesMessages.USER} ${authCredentialsDto.username} ${typesMessages.REGISTER}`,
       };
   }
@@ -60,7 +61,7 @@ export class AuthService {
           uid: user.id,
           username: user.username,
         },
-        message: 'prueba',
+        message: `${typesMessages.LOGIN}`,
       };
     }
   }

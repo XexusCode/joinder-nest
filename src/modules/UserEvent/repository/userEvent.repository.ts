@@ -4,7 +4,7 @@ import { UserEvent } from '../userEvent.entity';
 @EntityRepository(UserEvent)
 export class UserEventRepository extends Repository<UserEvent> {
   createUserEvent(userEvent: UserEvent) {
-    userEvent.save();
+    return userEvent.save();
   }
 
   updateUserEvent(userEventUpdated: UserEvent) {

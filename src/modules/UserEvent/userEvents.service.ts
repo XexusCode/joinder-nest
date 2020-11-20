@@ -14,6 +14,7 @@ import { EventRepository } from '../events/repository/event.repository';
 import { Connection } from 'typeorm';
 import { EventService } from '../events/events.service';
 import { typesMessages } from '../auth/types/types.messages';
+import { Event } from '../events/entity/event.entity';
 
 @Injectable()
 export class UserEventService {
@@ -36,8 +37,8 @@ export class UserEventService {
     id: number,
     user: User,
     admin: boolean,
-  ): Promise<{ message: string }> {
-    const event = await this.eventService.getEventByIdWithoutUser(id);
+  ): Promise<{ result: Event; message: string }> {
+    let event = await this.eventService.getEventById(id);
     const userEvent = await EventMapping.toUserEvent(user, event, admin);
 
     if (
@@ -47,11 +48,18 @@ export class UserEventService {
     )
       throw new ConflictException('User already on event');
 
-    this.userEventRepository.createUserEvent(userEvent);
+    await this.userEventRepository.createUserEvent(userEvent);
+
+    event = await this.eventService.getEventById(id);
     event.users.push(user);
-    this.eventRepository.save(event);
+
+    await this.eventRepository.save(event);
+
+    event = await this.eventService.getEventById(id);
+
     return {
       message: `${typesMessages.USER} ${userEvent.username} ${typesMessages.JOINED}`,
+      result: event,
     };
   }
 
@@ -71,8 +79,6 @@ export class UserEventService {
       user.username,
     );
 
-    console.log('activador', userEventTrigger);
-    console.log('para elimanar', userEventToDelete);
     if (
       userEventToDelete.rank < userEventTrigger.rank ||
       (userEventTrigger.rank === 3 &&
@@ -130,7 +136,6 @@ export class UserEventService {
   ): Promise<{ message: string }> {
     await this.eventService.validateEvent(id, user.username);
 
-    console.log(userEventDto);
     const { result: userEventTrigger } = await this.getUser(
       id,
       user.username,

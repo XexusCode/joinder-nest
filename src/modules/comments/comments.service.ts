@@ -22,7 +22,7 @@ export class CommentsService {
     commentDto: CommentDto,
     id,
     username: string,
-  ): Promise<{ message: string }> {
+  ): Promise<{ result: Comment; message: string }> {
     await this.eventService.validateEvent(id, username);
     const event = await this.eventService.getEventById(id);
     const { result: userEvent } = await this.userEventService.getUser(
@@ -31,9 +31,12 @@ export class CommentsService {
       username,
     );
     const comment = await commentMapping.toEntity(commentDto, event, userEvent);
-    await this.commentRepository.addComment(comment);
+    const newcomment = await this.commentRepository.addComment(comment);
+    delete newcomment.userEvent;
+    delete newcomment.event;
     return {
       message: `${typesMessages.COMMENT}  ${typesMessages.CREATED}`,
+      result: newcomment,
     };
   }
 

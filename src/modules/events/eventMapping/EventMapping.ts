@@ -14,6 +14,8 @@ export class EventMapping {
     event.startDate = eventCredentials.startDate;
     event.endDate = eventCredentials.endDate;
     event.img = eventCredentials.img;
+    event.todos = [];
+    event.comments = [];
 
     return event;
   }
