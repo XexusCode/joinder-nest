@@ -1,5 +1,4 @@
 import {
-  IsAlphanumeric,
   IsNotEmpty,
   IsString,
   MaxLength,
@@ -17,7 +16,6 @@ export class UserEventDto {
   username: string;
 
   @ApiProperty()
-  @IsAlphanumeric() // Cambiar to int
   @IsNotEmpty()
   @ApiProperty()
   rank: number;

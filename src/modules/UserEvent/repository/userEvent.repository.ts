@@ -3,16 +3,16 @@ import { UserEvent } from '../userEvent.entity';
 
 @EntityRepository(UserEvent)
 export class UserEventRepository extends Repository<UserEvent> {
-  createUserEvent(userEvent: UserEvent) {
-    return userEvent.save();
+  async createUserEvent(userEvent: UserEvent) {
+    return await userEvent.save();
   }
 
   updateUserEvent(userEventUpdated: UserEvent) {
     userEventUpdated.save();
   }
 
-  deleteUserEvent(userEventToDelete: UserEvent) {
-    this.remove(userEventToDelete);
+  async deleteUserEvent(userEventToDelete: UserEvent) {
+    await this.remove(userEventToDelete);
   }
 
   getUser(username: string): Promise<UserEvent> {

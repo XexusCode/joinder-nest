@@ -88,9 +88,12 @@ export class UserEventService {
 
     let event = await this.eventService.getEventById(id);
     this.eventService.validateEvent(id, userEventToDelete.username);
-    event.users = event.users.filter((user) => user.id !== user.id);
-    this.eventRepository.save(event);
-    this.userEventRepository.deleteUserEvent(userEventToDelete);
+    event.users = event.users.filter(
+      (user) => user.username !== userEventToDelete.username,
+    );
+
+    await this.userEventRepository.deleteUserEvent(userEventToDelete);
+    await this.eventRepository.save(event);
 
     return {
       message: `${typesMessages.USER} ${userEventToDelete.username} ${typesMessages.DELETED}`,
