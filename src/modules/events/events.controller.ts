@@ -90,6 +90,7 @@ export class EventsController {
 
   @ApiTags('Events')
   @Patch('/:id')
+  @UsePipes(ValidationPipe)
   async updateEvent(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
