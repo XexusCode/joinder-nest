@@ -159,10 +159,10 @@ export class UserEventService {
     userEventUpdated.id = userEventTarget.id;
     if (
       userEventTarget.rank < userEventTrigger.rank ||
-      userEventTrigger.rank === 3
-    )
+      userEventTrigger.rank === 2
+    ) {
       throw new UnauthorizedException();
-
+    }
     this.userEventRepository.updateUserEvent(userEventUpdated);
     return {
       message: `${typesMessages.USER} ${userEventTarget.username} ${typesMessages.UPDATED}`,

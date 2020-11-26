@@ -29,7 +29,7 @@ export class EventMapping {
   ): Promise<UserEvent> {
     const userEvent = new UserEvent();
     userEvent.username = user.username;
-    userEvent.rank = admin ? 0 : 3;
+    userEvent.rank = admin ? 0 : 2;
     userEvent.color = '#' + Math.floor(Math.random() * 16777215).toString(16);
     userEvent.event = event;
     userEvent.user = user;

@@ -20,7 +20,6 @@ describe('CatsController', () => {
 
   describe('findAll', () => {
     it('should return an array of cats', async () => {
-      // @ts-ignore
       const user: User = {
         id: 23,
         username: 'test user',
@@ -36,7 +35,7 @@ describe('CatsController', () => {
       // @ts-ignore
       jest.spyOn(authService, 'signUp').mockImplementation(() => result);
 
-      expect(await authController.signUp(authCredentials)).toBe(result);
+      expect(await authService.signUp(authCredentials)).toBe(result);
     });
   });
 });
