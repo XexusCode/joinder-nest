@@ -15,6 +15,7 @@ import { Connection } from 'typeorm';
 import { EventService } from '../events/events.service';
 import { typesMessages } from '../auth/types/types.messages';
 import { Event } from '../events/entity/event.entity';
+import { JoinEventDto } from './dto/JoinEventDto';
 
 @Injectable()
 export class UserEventService {
@@ -36,6 +37,7 @@ export class UserEventService {
   async joinUser(
     id: number,
     user: User,
+    joinEventDto: JoinEventDto,
     admin: boolean,
   ): Promise<{ result: Event; message: string }> {
     let event = await this.eventService.getEventById(id);
@@ -47,6 +49,9 @@ export class UserEventService {
       )
     )
       throw new ConflictException('User already on event');
+    if (event.password !== joinEventDto.password) {
+      throw new UnauthorizedException('La contraseña es incorrecta!');
+    }
 
     await this.userEventRepository.createUserEvent(userEvent);
 

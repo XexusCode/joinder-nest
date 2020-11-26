@@ -6,7 +6,6 @@ import { UserEvent } from '../../UserEvent/userEvent.entity';
 export class EventMapping {
   static async toEntity(eventCredentials: EventDto): Promise<Event> {
     const event = new Event();
-
     event.title = eventCredentials.title;
     event.location = eventCredentials.location;
     event.nmax = eventCredentials.nmax;
@@ -16,6 +15,7 @@ export class EventMapping {
     event.startDate = eventCredentials.startDate;
     event.endDate = eventCredentials.endDate;
     event.img = eventCredentials.img;
+    event.password = Math.round(Math.random() * 99999 + 10000).toString();
     event.todos = [];
     event.comments = [];
 

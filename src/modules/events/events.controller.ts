@@ -29,6 +29,7 @@ import { TodosService } from '../todos/todos.service';
 import { Todo } from '../todos/entity/todo.entity';
 import { ApiCreatedResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransformInterceptor } from '../../interceptor/transform.interceptor';
+import { JoinEventDto } from '../UserEvent/dto/JoinEventDto';
 @UseInterceptors(TransformInterceptor)
 @Controller('events')
 @UseGuards(AuthGuard('jwt'))
@@ -57,6 +58,7 @@ export class EventsController {
     const { result } = await this.userEventService.joinUser(
       event.id,
       user,
+      { password: event.password },
       true,
     );
     event.userEvents = [result.userEvents[0]];
@@ -110,8 +112,9 @@ export class EventsController {
   async joinUser(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
+    @Body() joinEventDto: JoinEventDto,
   ): Promise<{ message: string }> {
-    return this.userEventService.joinUser(id, user, false);
+    return this.userEventService.joinUser(id, user, joinEventDto, false);
   }
 
   @ApiTags('UserEvent')

@@ -7,17 +7,14 @@ export class UserEventDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(20)
-  @ApiProperty()
   username: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  @ApiProperty()
   rank: number;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
   color: string;
 }

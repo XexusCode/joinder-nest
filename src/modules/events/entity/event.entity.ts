@@ -47,6 +47,10 @@ export class Event extends BaseEntity {
   @Column()
   img: string;
 
+  @ApiProperty()
+  @Column()
+  password: string;
+
   @ManyToMany(() => User, { cascade: true })
   @JoinTable()
   users: User[];

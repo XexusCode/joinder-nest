@@ -44,17 +44,6 @@ export class EventService {
     return event;
   }
 
-  async getEventByIdWithoutUser(id: number): Promise<Event> {
-    const event = await this.eventRepository.getEventByIdWithoutUser(id);
-
-    if (!event) {
-      throw new NotFoundException(
-        `${typesMessages.EVENT} "${id}" ${typesMessages.NOTFOUND}`,
-      );
-    }
-    return event;
-  }
-
   async deleteEvent(
     id: number,
     username: string,
