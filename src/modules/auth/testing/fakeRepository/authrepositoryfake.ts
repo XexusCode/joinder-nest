@@ -1,6 +1,5 @@
 // @ts-ignore
 
-
 export const repositoryMockFactory: jest.Mock<
   { findOne: jest.Mock<any, [undefined]> },
   any[]

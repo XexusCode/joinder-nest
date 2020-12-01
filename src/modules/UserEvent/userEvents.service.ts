@@ -43,12 +43,18 @@ export class UserEventService {
     let event = await this.eventService.getEventById(id);
     const userEvent = await EventMapping.toUserEvent(user, event, admin);
 
+    console.log(event.nmax);
+    console.log(event.userEvents.length);
+    if (event.userEvents.length >= event.nmax) {
+      throw new ConflictException('El evento esta lleno!');
+    }
+
     if (
       event.users.some(
         (userOnEvents) => userOnEvents.username === user.username,
       )
     )
-      throw new ConflictException('User already on event');
+      throw new ConflictException('Este usuario ya esta en el evento');
     if (event.password !== joinEventDto.password) {
       throw new UnauthorizedException('La contraseña es incorrecta!');
     }
