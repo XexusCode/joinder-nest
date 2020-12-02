@@ -12,10 +12,12 @@ export class UserEventRepository extends Repository<UserEvent> {
   }
 
   async deleteUserEvent(userEventToDelete: UserEvent) {
-    await this.remove(userEventToDelete);
+    console.log(userEventToDelete);
+    const prueba = await this.delete({ id: userEventToDelete.id });
+    console.log(prueba);
   }
 
-  getUser(username: string): Promise<UserEvent> {
-    return this.findOne({ where: [{ username: username }] });
+  getUser(targetId: number): Promise<UserEvent> {
+    return this.findOne({ where: [{ id: targetId }] });
   }
 }

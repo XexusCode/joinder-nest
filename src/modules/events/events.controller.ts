@@ -127,42 +127,37 @@ export class EventsController {
   }
 
   @ApiTags('UserEvent')
-  @Get(':id/userEvent/:targetUsername')
+  @Get(':id/userEvent/:targetId')
   async getUser(
     @Param('id', ParseIntPipe) id: number,
-    @Param('targetUsername') targetUsername: string,
+    @Param('targetId') targetId: number,
     @GetUser() { username },
   ): Promise<{ result: UserEvent; message: string }> {
-    return this.userEventService.getUser(id, targetUsername, username);
+    return this.userEventService.getUser(id, targetId, username);
   }
 
   @ApiTags('UserEvent')
-  @Delete(':id/userEvent/:targetUsername')
+  @Delete(':id/userEvent/:targetId')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
-    @Param('targetUsername') targetUsername: string,
+    @Param('targetId') targetId: number,
 
     @GetUser() user: User,
   ): Promise<{ message: string }> {
-    return this.userEventService.deleteUser(id, targetUsername, user);
+    return this.userEventService.deleteUser(id, targetId, user);
   }
 
   @ApiTags('UserEvent')
-  @Patch(':id/userEvent/:targetUsername')
+  @Patch(':id/userEvent/:targetId')
   @UsePipes(ValidationPipe)
   async UpdateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Param('targetUsername') targetUsername: string,
+    @Param('targetId') targetId: number,
 
     @Body() userEventDto: UserEventDto,
     @GetUser() user: User,
   ): Promise<{ message: string }> {
-    return this.userEventService.updateUser(
-      id,
-      targetUsername,
-      user,
-      userEventDto,
-    );
+    return this.userEventService.updateUser(id, targetId, user, userEventDto);
   }
 
   @ApiTags('Comments')
