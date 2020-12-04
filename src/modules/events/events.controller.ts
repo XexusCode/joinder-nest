@@ -127,48 +127,49 @@ export class EventsController {
   }
 
   @ApiTags('UserEvent')
-  @Get(':id/userEvent/:targetId')
+  @Get(':id/userEvent/:targetUsername')
   async getUser(
     @Param('id', ParseIntPipe) id: number,
-    @Param('targetId') targetId: number,
+    @Param('targetUsername') targetUsername: string,
     @GetUser() { username },
   ): Promise<{ result: UserEvent; message: string }> {
-    return this.userEventService.getUser(id, targetId, username);
+    return this.userEventService.getUser(id, targetUsername, username);
   }
 
   @ApiTags('UserEvent')
-  @Delete(':id/userEvent/:targetId')
+  @Delete(':id/userEvent/:targetUsername')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
-    @Param('targetId') targetId: number,
+    @Param('targetUsername') targetUsername: string,
 
     @GetUser() user: User,
   ): Promise<{ message: string }> {
-    return this.userEventService.deleteUser(id, targetId, user);
+    return this.userEventService.deleteUser(id, targetUsername, user);
   }
 
   @ApiTags('UserEvent')
-  @Patch(':id/userEvent/:targetId')
+  @Patch(':id/userEvent/:targetUsername')
   @UsePipes(ValidationPipe)
   async UpdateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Param('targetId') targetId: number,
+    @Param('targetUsername') targetUsername: string,
 
     @Body() userEventDto: UserEventDto,
     @GetUser() user: User,
   ): Promise<{ message: string }> {
-    return this.userEventService.updateUser(id, targetId, user, userEventDto);
+    return this.userEventService.updateUser(id, targetUsername, user, userEventDto);
   }
 
   @ApiTags('Comments')
-  @Post(':id/comment')
+  @Post(':id/comment/')
   @UsePipes(ValidationPipe)
   async addComment(
     @Param('id', ParseIntPipe) id: number,
-    @GetUser() { username },
     @Body() commentDto: CommentDto,
+    @GetUser() { username },
+
   ): Promise<{ result: Comment; message: string }> {
-    return await this.commentService.addComment(commentDto, id, username);
+    return await this.commentService.addComment(commentDto, id,username);
   }
   @ApiTags('Comments')
   @Get(':id/comment')
@@ -176,8 +177,9 @@ export class EventsController {
   async getAllComments(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
+
   ): Promise<{ result: Comment[]; message: string }> {
-    return this.commentService.getAllComments(id, username);
+    return this.commentService.getAllComments(id,username);
   }
 
   @ApiTags('Comments')
@@ -187,31 +189,32 @@ export class EventsController {
     @Param('idComment', ParseIntPipe) idComment: number,
     @GetUser() { username },
   ): Promise<{ result: Comment; message: string }> {
-    return this.commentService.getComment(id, username, idComment);
+    return this.commentService.getComment(id, idComment,username);
   }
   @ApiTags('comments')
   @Delete('/:id/comment/:idComment/')
   async deleteComment(
+    @GetUser() { username },
     @Param('id', ParseIntPipe) id: number,
     @Param('idComment', ParseIntPipe) idComment: number,
-    @GetUser() { username },
   ): Promise<{ message: string }> {
-    return this.commentService.deleteComment(id, username, idComment);
+    return this.commentService.deleteComment(id, idComment,username);
   }
   @ApiTags('Comments')
   @UsePipes(ValidationPipe)
-  @Patch('/:id/comment/:idComment/')
+  @Patch('/:id/comment/:idUser/:idComment/')
   async updateComment(
     @Param('id', ParseIntPipe) id: number,
     @Param('idComment', ParseIntPipe) idComment: number,
-    @GetUser() { username },
     @Body() createCommentDto: CommentDto,
+    @GetUser() { username },
+
   ): Promise<{ message: string }> {
     return this.commentService.updateComment(
       id,
-      username,
       idComment,
       createCommentDto,
+      username,
     );
   }
   @ApiTags('Todos')

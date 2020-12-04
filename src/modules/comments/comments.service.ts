@@ -10,6 +10,24 @@ import { typesMessages } from '../auth/types/types.messages';
 
 @Injectable()
 export class CommentsService {
+  async deleteComment(
+    id: number,
+    idComment: number,
+    username: string,
+
+  ): Promise<{ message: string }> {
+    await this.eventService.validateEvent(id, username);
+    const result = await this.commentRepository.delete({ id: idComment });
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+
+    return {
+      message: `${typesMessages.COMMENT} ${idComment} ${typesMessages.DELETED}`,
+    };
+  }
+
   constructor(
     @InjectRepository(CommentsRepository)
     private commentRepository: CommentsRepository,
@@ -40,28 +58,11 @@ export class CommentsService {
     };
   }
 
-  async deleteComment(
-    id: number,
-    username: string,
-    idComment: number,
-  ): Promise<{ message: string }> {
-    await this.eventService.validateEvent(id, username);
-    const result = await this.commentRepository.delete({ id: idComment });
-
-    if (result.affected === 0) {
-      throw new NotFoundException();
-    }
-
-    return {
-      message: `${typesMessages.COMMENT} ${idComment} ${typesMessages.DELETED}`,
-    };
-  }
-
   async updateComment(
     id: number,
-    username: string,
     idComment: number,
     commentDto: CommentDto,
+    username: string,
   ): Promise<{ message: string }> {
     await this.eventService.validateEvent(id, username);
 
@@ -90,8 +91,8 @@ export class CommentsService {
 
   async getComment(
     id: number,
-    username: string,
     idComment: number,
+    username: string,
   ): Promise<{ result: Comment; message: string }> {
     await this.eventService.validateEvent(id, username);
     const comment = await this.commentRepository.getComment(idComment);

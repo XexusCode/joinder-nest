@@ -11,13 +11,25 @@ export class UserEventRepository extends Repository<UserEvent> {
     userEventUpdated.save();
   }
 
-  async deleteUserEvent(userEventToDelete: UserEvent) {
-    console.log(userEventToDelete);
-    const prueba = await this.delete({ id: userEventToDelete.id });
+  async deleteUserEvent(userEventToDelete: UserEvent, eventId:number) {
+    const prueba = await this.createQueryBuilder('userEvent')
+      .leftJoinAndSelect("userEvent.event", "event")
+      .where(`userEvent.username = "${userEventToDelete.username}"`)
+      .andWhere(`event.id = ${eventId}`).getOne()
+
+
     console.log(prueba);
+    try {
+      await this.delete(prueba)
+    }
+    catch (err) {
+      console.log(err);
+    }
+
+
   }
 
-  getUser(targetId: number): Promise<UserEvent> {
-    return this.findOne({ where: [{ id: targetId }] });
+  getUser(targetUsername: string): Promise<UserEvent> {
+    return this.findOne({ where: [{ username: targetUsername }] });
   }
 }

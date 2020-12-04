@@ -74,7 +74,7 @@ export class UserEventService {
 
   async deleteUser(
     id: number,
-    targetId: number,
+    targetId: string,
     user: User,
   ): Promise<{ message: string }> {
     const { result: userEventToDelete } = await this.getUser(
@@ -84,10 +84,9 @@ export class UserEventService {
     );
     const { result: userEventTrigger } = await this.getUser(
       id,
-      user.id,
+      user.username,
       user.username,
     );
-    console.log('aqui', userEventToDelete);
 
     if (
       userEventToDelete.rank < userEventTrigger.rank ||
@@ -101,8 +100,8 @@ export class UserEventService {
     event.users = event.users.filter(
       (user) => user.username !== userEventToDelete.username,
     );
+    await this.userEventRepository.deleteUserEvent(userEventToDelete,id);
     await this.eventRepository.save(event);
-    await this.userEventRepository.deleteUserEvent(userEventToDelete);
 
     return {
       message: `${typesMessages.USER} ${userEventToDelete.username} ${typesMessages.DELETED}`,
@@ -111,14 +110,14 @@ export class UserEventService {
 
   async getUser(
     id: number,
-    targetId: number,
+    targetUsername: string,
     username: string,
   ): Promise<{ result: UserEvent; message: string }> {
     await this.eventService.validateEvent(id, username);
-    const userEvent = await this.userEventRepository.getUser(targetId);
+    const userEvent = await this.userEventRepository.getUser(targetUsername);
 
     if (!userEvent) {
-      throw new NotFoundException(`User  "${targetId}" not found`);
+      throw new NotFoundException(`User  "${targetUsername}" not found`);
     }
     return {
       message: '',
@@ -142,7 +141,7 @@ export class UserEventService {
 
   async updateUser(
     id: number,
-    targetId: number,
+    targetUsername: string,
     user: User,
     userEventDto: UserEventDto,
   ): Promise<{ message: string }> {
@@ -150,13 +149,13 @@ export class UserEventService {
 
     const { result: userEventTrigger } = await this.getUser(
       id,
-      user.id,
+      user.username,
       user.username,
     );
     const userEventUpdated = await UserEventMapping.toEntity(userEventDto);
     const { result: userEventTarget } = await this.getUser(
       id,
-      targetId,
+      targetUsername,
       user.username,
     );
 
