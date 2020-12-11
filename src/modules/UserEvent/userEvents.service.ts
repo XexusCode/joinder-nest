@@ -100,7 +100,7 @@ export class UserEventService {
     event.users = event.users.filter(
       (user) => user.username !== userEventToDelete.username,
     );
-    await this.userEventRepository.deleteUserEvent(userEventToDelete,id);
+    await this.userEventRepository.deleteUserEvent(userEventToDelete, id);
     await this.eventRepository.save(event);
 
     return {
@@ -114,7 +114,10 @@ export class UserEventService {
     username: string,
   ): Promise<{ result: UserEvent; message: string }> {
     await this.eventService.validateEvent(id, username);
-    const userEvent = await this.userEventRepository.getUser(targetUsername);
+    const userEvent = await this.userEventRepository.getUser(
+      targetUsername,
+      id,
+    );
 
     if (!userEvent) {
       throw new NotFoundException(`User  "${targetUsername}" not found`);
@@ -160,8 +163,11 @@ export class UserEventService {
     );
 
     userEventUpdated.id = userEventTarget.id;
+
+    console.log('usereventtarget', userEventTarget);
+    console.log('usereventtrigger', userEventTrigger);
     if (
-      userEventTarget.rank < userEventTrigger.rank ||
+      userEventTarget.rank <= userEventTrigger.rank ||
       userEventTrigger.rank === 2
     ) {
       throw new UnauthorizedException();

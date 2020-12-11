@@ -12,11 +12,7 @@ export class UserEventRepository extends Repository<UserEvent> {
   }
 
   async deleteUserEvent(userEventToDelete: UserEvent, eventId: number) {
-    const user = await this.createQueryBuilder('userEvent')
-      .leftJoinAndSelect('userEvent.event', 'event')
-      .where(`userEvent.username = "${userEventToDelete.username}"`)
-      .andWhere(`event.id = ${eventId}`)
-      .getOne();
+    const user = await this.getUser(userEventToDelete.username, eventId);
 
     try {
       await this.delete(user);
@@ -25,7 +21,11 @@ export class UserEventRepository extends Repository<UserEvent> {
     }
   }
 
-  getUser(targetUsername: string): Promise<UserEvent> {
-    return this.findOne({ where: [{ username: targetUsername }] });
+  async getUser(targetUsername: string, eventId: number): Promise<UserEvent> {
+    return await this.createQueryBuilder('userEvent')
+      .leftJoinAndSelect('userEvent.event', 'event')
+      .where(`userEvent.username = "${targetUsername}"`)
+      .andWhere(`event.id = ${eventId}`)
+      .getOne();
   }
 }
