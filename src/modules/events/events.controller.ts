@@ -44,7 +44,7 @@ export class EventsController {
   @ApiTags('Events')
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
-    type: User,
+    type: Event,
   })
   @Post()
   @UsePipes(ValidationPipe)
@@ -65,6 +65,10 @@ export class EventsController {
     return { message, result: event };
   }
   @ApiTags('Events')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: Event,
+  })
   @Get()
   async getAllEvents(
     @GetUser() { username },
@@ -128,6 +132,10 @@ export class EventsController {
 
   @ApiTags('UserEvent')
   @Get(':id/userEvent/:targetUsername')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: User,
+  })
   async getUser(
     @Param('id', ParseIntPipe) id: number,
     @Param('targetUsername') targetUsername: string,
@@ -157,7 +165,12 @@ export class EventsController {
     @Body() userEventDto: UserEventDto,
     @GetUser() user: User,
   ): Promise<{ message: string }> {
-    return this.userEventService.updateUser(id, targetUsername, user, userEventDto);
+    return this.userEventService.updateUser(
+      id,
+      targetUsername,
+      user,
+      userEventDto,
+    );
   }
 
   @ApiTags('Comments')
@@ -167,9 +180,8 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() commentDto: CommentDto,
     @GetUser() { username },
-
   ): Promise<{ result: Comment; message: string }> {
-    return await this.commentService.addComment(commentDto, id,username);
+    return await this.commentService.addComment(commentDto, id, username);
   }
   @ApiTags('Comments')
   @Get(':id/comment')
@@ -177,9 +189,8 @@ export class EventsController {
   async getAllComments(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() { username },
-
   ): Promise<{ result: Comment[]; message: string }> {
-    return this.commentService.getAllComments(id,username);
+    return this.commentService.getAllComments(id, username);
   }
 
   @ApiTags('Comments')
@@ -189,7 +200,7 @@ export class EventsController {
     @Param('idComment', ParseIntPipe) idComment: number,
     @GetUser() { username },
   ): Promise<{ result: Comment; message: string }> {
-    return this.commentService.getComment(id, idComment,username);
+    return this.commentService.getComment(id, idComment, username);
   }
   @ApiTags('comments')
   @Delete('/:id/comment/:idComment/')
@@ -198,7 +209,7 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @Param('idComment', ParseIntPipe) idComment: number,
   ): Promise<{ message: string }> {
-    return this.commentService.deleteComment(id, idComment,username);
+    return this.commentService.deleteComment(id, idComment, username);
   }
   @ApiTags('Comments')
   @UsePipes(ValidationPipe)
@@ -208,7 +219,6 @@ export class EventsController {
     @Param('idComment', ParseIntPipe) idComment: number,
     @Body() createCommentDto: CommentDto,
     @GetUser() { username },
-
   ): Promise<{ message: string }> {
     return this.commentService.updateComment(
       id,
